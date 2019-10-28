@@ -47,4 +47,23 @@ condición("Largo de pista").
 condición("Velocidad").
 condición("Distancia").
 
+% Analisis de la gramática
+
+oracion(S0,S):- sintagma_nominal(S0,S1), sintagma_verbal(S1,S).
+sintagma_nominal(S0,S):- articulo(S0,S1),sustantivo(S1,S).
+sintagma_nominal(S0,S):- sustantivo(S0,S).
+sintagma_verbal(S0,S):- verbo(S0,S).
+sintagma_verbal(S0,S):- verbo(S0,S1),sintagma_nominal(S1,S).
+
+%Base de datos de la gramatica
+articulo([el|S],S).
+articulo([la|S],S).
+sustantivo([aeronave|S],S).
+verbo([aterrizar|S],S).
+verbo([despegar|S],S).
+
+
+iniciar_MayCEy:- read(X), oracion(X,Y), write(Y).
+
 consulta:- write("Digite tamano"),read(Tamano),aeronave(Tamano,Nave),write(Nave).
+
