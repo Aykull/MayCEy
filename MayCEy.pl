@@ -49,21 +49,42 @@ condición("Distancia").
 
 % Analisis de la gramática
 
-oracion(S0,S):- sintagma_nominal(S0,S1), sintagma_verbal(S1,S).
-sintagma_nominal(S0,S):- articulo(S0,S1),sustantivo(S1,S).
-sintagma_nominal(S0,S):- sustantivo(S0,S).
-sintagma_verbal(S0,S):- verbo(S0,S).
-sintagma_verbal(S0,S):- verbo(S0,S1),sintagma_nominal(S1,S).
+oracion_inicial(X,Y):- saludo(X,Y).
+saludo --> sin_nom.
+sin_nom --> com1,sust. %Hola/hola MayCEy
+sin_nom --> com2,com3,sust. %Buenos/buenos dias/tardes/noches MayCEy
+sin_nom --> com2,com3. %Buenos/buenos dias/tardes/noches
+sust --> [W],{sustantivo(W)}.
+com1 --> [W],{comple1(W)}.
+com2 --> [W],{comple2(W)}.
+com3 --> [W],{comple3(W)}.
 
-%Base de datos de la gramatica
-articulo([el|S],S).
-articulo([la|S],S).
-sustantivo([aeronave|S],S).
-verbo([aterrizar|S],S).
-verbo([despegar|S],S).
+%Base de datos para el saludo
+sustantivo("MayCEy").
+comple1("Hola").
+comple1("hola").
+comple2("Buenos").
+comple2("buenos").
+comple3("dias").
+comple3("tardes").
+comple3("noches").
 
 
-iniciar_MayCEy:- read(X), oracion(X,Y), write(Y).
+iniciar_MayCEy:-
+    read(X),
+    split_string(X," "," ",Y),
+    oracion_inicial(Y, []),
+    write("Hola, por favor identifiquese").
+   %se hace otro read
+   %se ejecuta otra funcion que siga respondiendo, una que se llame darpista o similar
+
 
 consulta:- write("Digite tamano"),read(Tamano),aeronave(Tamano,Nave),write(Nave).
+prueba:- read(X), write(X).
 
+%Base de datos de la gramatica
+articulo("el").
+articulo("la").
+%sustantivo("aeronave").
+verbo("aterrizar").
+verbo("despegar").
