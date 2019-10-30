@@ -51,13 +51,13 @@ condición("Distancia").
 
 oracion_inicial(X,Y):- saludo(X,Y).
 saludo --> sin_nom.
-sin_nom --> com1,sust. %Hola/hola MayCEy
-sin_nom --> com2,com3,sust. %Buenos/buenos dias/tardes/noches MayCEy
-sin_nom --> com2,com3. %Buenos/buenos dias/tardes/noches
-sust --> [W],{sustantivo(W)}.
-com1 --> [W],{comple1(W)}.
-com2 --> [W],{comple2(W)}.
-com3 --> [W],{comple3(W)}.
+sin_nom--> com1,sust. %Hola/hola MayCEy
+sin_nom--> com2,com3,sust. %Buenos/buenos dias/tardes/noches MayCEy
+sin_nom--> com2,com3. %Buenos/buenos dias/tardes/noches
+sust--> [W],{sustantivo(W)}.
+com1--> [W],{comple1(W)}.
+com2--> [W],{comple2(W)}.
+com3--> [W],{comple3(W)}.
 
 %Base de datos para el saludo
 sustantivo("MayCEy").
@@ -71,12 +71,12 @@ comple3("noches").
 
 
 iniciar_MayCEy:-
-    read(X),
-    split_string(X," "," ",Y),
-    oracion_inicial(Y, []),
+    read(X), %IMPORTANTE responder entre comillas
+    split_string(X," ","",L),
+    oracion_inicial(L, []),
     write("Hola, por favor identifiquese").
    %se hace otro read
-   %se ejecuta otra funcion que siga respondiendo, una que se llame darpista o similar
+   %se ejecuta otra funcion que siga respondiendo, una que se llame darpista o similar, que sea un ciclo
 
 
 consulta:- write("Digite tamano"),read(Tamano),aeronave(Tamano,Nave),write(Nave).
