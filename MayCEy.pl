@@ -47,21 +47,34 @@ condición("Largo de pista").
 condición("Velocidad").
 condición("Distancia").
 
-% Analisis de la gramática
+% -------------------------------------------------------------------------
+% Funcion que inicia MayCEy
+iniciar_MayCEy:-
+    read(T), %IMPORTANTE responder entre comillas
+    string_lower(T,X),
+    split_string(X," ","",L),
+    oracion_inicial(L, []).
+   %se hace otro read
+   %se ejecuta otra funcion que siga respondiendo, una que se llame darpista o similar, que sea un ciclo
 
+
+% ------------------------------------------------------------------------
+% Oracion inicial en caso de saludo
 oracion_inicial(X,Y):-
     saludo(X,Y),
-    write("Hola, en que le puedo ayudar"),
-    read(U),
+    write("Hola, en que le puedo ayudar?"),
+    nl,
+    read(T),
+    string_lower(T,U),
     split_string(U," ","",L),
     verificarsolicitud(L,[]).
 
 %Gramatica BNF para el la oracion inicial con saludo
 saludo --> sin_nom.
-sin_nom--> com1,sust. %Hola/hola MayCEy
-sin_nom--> com2,com3,sust. %Buenos/buenos dias/tardes/noches MayCEy
-sin_nom--> com2,com3. %Buenos/buenos dias/tardes/noches
-sin_nom--> verb,prep,sust. %LLamando a MayCEy
+sin_nom--> com1,sust. %hola maycey
+sin_nom--> com2,com3,sust. %buenos dias/tardes/noches maycey
+sin_nom--> com2,com3. %buenos/buenos dias/tardes/noches
+sin_nom--> verb,prep,sust. %llamando a maycey
 
 sust--> [W],{sustantivo(W)}.
 com1--> [W],{comple1(W)}.
@@ -71,10 +84,8 @@ verb--> [W],{verbo(W)}.
 prep--> [W],{prepos(W)}.
 
 %Base de datos para el saludo
-sustantivo("MayCEy").
-comple1("Hola").
+sustantivo("maycey").
 comple1("hola").
-comple2("Buenos").
 comple2("buenos").
 comple3("dias").
 comple3("tardes").
@@ -82,29 +93,35 @@ comple3("noches").
 verbo("llamando").
 prepos("a").
 
-oracion_inicial(X,Y):-
-    emergencia(X,Y),
-    write("Cual es su emergencia?").
+% Oracion inicial en caso de emergencia
+oracion_inicial(X,Y):- emergencia(X,Y),
+    write("Cual es su emergencia?"),
+    nl.
 %    read(E),
 %   split_string(E," ","",L).
 
+%Gramatica BNF para una emergencia
 emergencia --> sin_nom.
 sin_nom--> help.  %Mayday/mayday
 sin_nom--> help,help. %Mayday/mayday Mayday/mayday
+
 help --> [W],{id(W)}.
-id("Mayday").
+
+%Base de datos la oracion inicial en caso de emergencia
 id("mayday").
 
-
+% -------------------------------------------------------------------------------
+% Verificacion de la solicitud del usuario
 verificarsolicitud(X,Y):-
     solicitud(X,Y),
     write("Por favor identifiquese"),
-    read(A),
+    nl,
+    read(X),
+    string_lower(X,A),
     split_string(A," ","",B),
     identificacion(B,[]).
 
 %Gramatica BNF para solicitud de despegue o aterrizaje
-
 solicitud--> sin_v.
 sin_v--> verbpres, sust2, prep2, verbinf.
 verbpres --> [W],{verboprest(W)}.
@@ -112,18 +129,24 @@ sust2--> [W],{sustantivo2(W)}.
 prep2--> [W], {preposicion2(W)}.
 verbinf--> [W], {verboinf(W)}.
 
-verboprest("Solicito").
+%Base de datos para la identificacion del usuario
+verboprest("solicito").
 sustantivo2("permiso").
 preposicion2("para").
 verboinf("aterrizar").
 verboinf("despegar").
 
+% ------------------------------------------------------------------------
+% Identificacion del usuario en caso de toda la informacion
 identificacion(A,B):-
     ident(A,B),
-    write("Gracias,¿Que tipo de aeronave es?").
+    write("Gracias,¿Que tipo de aeronave es?"),
+    nl.
 
+%Gramatica BNF para la identificacion del usuario
 ident--> identBlock.
 identBlock --> tagvuel, numvuel,tagaerol, aeroli, tagmatri, matriaeronave.
+               %vuelo: 400,/404, aerolinea: tec-airlines, matricula: {matricula}
 
 tagvuel--> [W], { tagvuelo(W)}.
 numvuel--> [W], { numvuelo(W)}.
@@ -131,28 +154,37 @@ tagaerol--> [W], { tagaerolinea(W)}.
 aeroli--> [W], { aerolinea(W)}.
 tagmatri--> [W], { tagmatri(W)}.
 matriaeronave--> [W], { matricula(W)}.
-comm --> [W], {comma(W)}.
 
-tagvuelo("Vuelo:").
+%Base de datos para la identificacion del usuario
+tagvuelo("vuelo:").
 numvuelo("400,").
 numvuelo("404,").
-tagaerolinea("Aerolinea:").
-aerolinea("TEC-Airlines").
-tagmatri("Matricula:").
-matricula("Tango Fox Lima Delta").
-comma(",").
+tagaerolinea("aerolinea:").
+aerolinea("tec-airlines,").
+tagmatri("matricula:").
+matricula("tango fox lima delta").
+
+% ------------------------------------------------------------------------
+%Oracion de despedida
+oracion_final(X,Y):-despedida(X,Y).
+
+% Gramatica BNF para la oracion de despedida
+despedida-->sin_nom_d.
+sin_nom_d--> dcom1.
+sin_nom_d--> dcom1,dsust. %adios maycey
+sin_nom_d--> dcom2,dcon,dcom3,dsust. %cambio y fuera maycey
+sin_nom_d--> dcom2,dcon,dcom3. %cambio y fuera
 
 
+dsust--> [W],{dsustantivo(W)}.
+dcom1--> [W],{dcomple1(W)}.
+dcom2--> [W],{dcomple2(W)}.
+dcom3--> [W],{dcomple3(W)}.
+dcon--> [W],{dcong(W)}.
 
-iniciar_MayCEy:-
-    read(X), %IMPORTANTE responder entre comillas
-    split_string(X," ","",L),
-    oracion_inicial(L, []).
-   %se hace otro read
-   %se ejecuta otra funcion que siga respondiendo, una que se llame darpista o similar, que sea un ciclo
-
-
-%Base de datos de la gramatica
-articulo("el").
-articulo("la").
-%sustantivo("aeronave").
+%Base de datos dela despedida
+dsustantivo("mayCEy").
+dcomple1("adios").
+dcomple2("cambio").
+dcomple3("fuera").
+dcong("y").
