@@ -51,6 +51,9 @@ condición("Largo de pista").
 condición("Velocidad").
 condición("Distancia").
 
+%Horarios de salida definidos cierto tiempo (definir) poner mas
+hora("15:00 pm").
+
 % -------------------------------------------------------------------------
 % Funcion que inicia MayCEy
 iniciar_MayCEy:-
@@ -101,8 +104,8 @@ prepos("a").
 oracion_inicial(X,Y):- emergencia(X,Y),
     write("Cual es su emergencia?"),
     nl.
-    read(E),
-   split_string(E," ","",L).
+%    read(E),
+%   split_string(E," ","",L).
 
 %Gramatica BNF para una emergencia
 emergencia --> sin_nom.
@@ -146,7 +149,19 @@ verboinf("despegar").
 identificacion(A,B):-
     ident(A,B),
     write("Gracias,¿Que tipo de aeronave es?"),
-    nl.
+    nl,
+    read(U),
+    aeronave(V,U), %la V indica el tamaño de la aeronave
+    write("Por favor indique la hora de salida"),
+    nl,
+    read(H), %La hora para cuando la pista esta ocupada :v
+    hora(H),
+    write("Por favor indique su direccion"),
+    nl,
+    read(D),
+    nl,
+    pista(P,V,D),
+    write(P), write(" asignada por 5 minutos").
 
 %Gramatica BNF para la identificacion del usuario
 ident--> identBlock.
@@ -164,7 +179,6 @@ matriaeronave--> [W],{matricula(W)}.
 tagvuelo("vuelo:").
 tagaerolinea("aerolinea:").
 tagmatri("matricula:").
-
 numvuelo("400,").
 numvuelo("404,").
 
@@ -176,6 +190,17 @@ matricula("lima").
 matricula("delta").
 matricula("charlie").
 matricula("alfa").
+
+% ------------------------------------------------------------------------
+% Predicado que asigna la pista
+% asignacion(X,Y):- aeronave(Z,X), write("Su nave es de tipo "),
+% write(Z).
+%
+% -----------------------------------------------------------------------
+% Predicados que determinan si el usuario desea aterrizar o despegar
+miembro(X, [X|_]).
+miembro(X, [_|R]):- miembro(X,R).
+
 
 % ------------------------------------------------------------------------
 %Oracion de despedida

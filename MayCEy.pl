@@ -1,79 +1,24 @@
-%Directriz para evitar warnings molestos para el usuario
-:-discontiguous(oracion_inicial/2).
-:-discontiguous(sin_nom/2).
-
-%Base de datos del sistema.
-
-%Aviones pequeños.
-aeronave(pequeño,"Cessna").
-aeronave(pequeño,"Beechcraft").
-aeronave(pequeño,"Embraer Pheno").
-%Aviones medianos.
-aeronave(mediano,"Boing 717").
-aeronave(mediano,"Embraer 190").
-aeronave(mediano,"Airbus A220").
-%Aviones grandes.
-aeronave(grande,"Airbus 340").
-aeronave(grande,"Airbus 380").
-
-%Pistas.
-pista("P1",pequeño,"Este a Oeste").
-pista("P1",pequeño,"Oeste a Este").
-
-pista("P2-1",pequeño,"Este a Oeste").
-pista("P2-1",mediano,"Este a Oeste").
-pista("P2-1",pequeño,"Oeste a Este").
-pista("P2-1",mediano,"Oeste a Este").
-
-pista("P3",pequeño,"Este a Oeste").
-pista("P3",mediano,"Este a Oeste").
-pista("P3",grande,"Este a Oeste").
-
-pista("P3",pequeño,"Oeste a Este").
-pista("P3",mediano,"Oeste a Este").
-pista("P3",grande,"Oeste a Este").
-
-%Emergencias.
-emergencias("Perdida de motor","Llamar a bomberos").
-emergencias("Parto en vuelo","Llamar a médico").
-emergencias("Paro cardiaco","Llamar a médico").
-emergencias("Secuestro","Llamar al OIJ y a la Fuerza Pública").
-
-%Atención de Emergencias.
-atenEmergencias("Llamar a bomberos").
-atenEmergencias("Llamar a médico").
-atenEmergencias("Llamar al OIJ y a la Fuerza Pública").
-
-%Condición de Aterrizaje.
-condición("Viento").
-condición("Peso").
-condición("Largo de pista").
-condición("Velocidad").
-condición("Distancia").
-
 % -------------------------------------------------------------------------
-% Funcion que inicia MayCEy
+% Predicado que inicia a MayCEy
 iniciar_MayCEy:-
     read(T), %IMPORTANTE responder entre comillas
     string_lower(T,X),
     split_string(X," ","",L),
     oracion_inicial(L, []).
-   %se hace otro read
-   %se ejecuta otra funcion que siga respondiendo, una que se llame darpista o similar, que sea un ciclo
-
 
 % ------------------------------------------------------------------------
-% Oracion inicial en caso de saludo
+% Predicado que da respuesta a la oracion inicial en caso de saludo
+%
 oracion_inicial(X,Y):-
     saludo(X,Y),
     write("Hola, en que le puedo ayudar?"),
-    nl,
-    read(T),
-    string_lower(T,U),
-    split_string(U," ","",L),
-    verificarsolicitud(L,[]).
+    nl, %salto de linea
+    read(T), %lee lo que escribe el usuario
+    string_lower(T,U), %lo pasa a minuscula
+    split_string(U," ","",L), %lo convierte en una lista
+    verificarsolicitud(L,[]). %pasa esa lista al predicado
 
-%Gramatica BNF para el la oracion inicial con saludo
+%Gramatica BNF para la oracion inicial con saludo
 saludo --> sin_nom.
 sin_nom--> com1,sust. %hola maycey
 sin_nom--> com2,com3,sust. %buenos dias/tardes/noches maycey
@@ -115,7 +60,8 @@ help --> [W],{id(W)}.
 id("mayday").
 
 % -------------------------------------------------------------------------------
-% Verificacion de la solicitud del usuario
+% Predicado para la verificacion de la solicitud del usuario (despegar o
+% aterrizar)
 verificarsolicitud(X,Y):-
     solicitud(X,Y),
     write("Por favor identifiquese"),
@@ -127,7 +73,7 @@ verificarsolicitud(X,Y):-
 
 %Gramatica BNF para solicitud de despegue o aterrizaje
 solicitud--> sin_v.
-sin_v--> verbpres, sust2, prep2, verbinf.
+sin_v--> verbpres, sust2, prep2, verbinf. %solicito permiso para aterrizar/despegar
 
 verbpres --> [W],{verboprest(W)}.
 sust2--> [W],{sustantivo2(W)}.
@@ -142,11 +88,23 @@ verboinf("aterrizar").
 verboinf("despegar").
 
 % ------------------------------------------------------------------------
-% Identificacion del usuario en caso de toda la informacion
+% Predicado que lee la identificacion y que asigna una pista al usuario
 identificacion(A,B):-
     ident(A,B),
     write("Gracias,¿Que tipo de aeronave es?"),
-    nl.
+    nl,
+    read(U),
+    aeronave(V,U), %la V indica el tamaño de la aeronave
+    write("Por favor indique la hora de salida"),
+    nl,
+    read(H), %"almacena" en H la hora de salida
+    hora(H), %La hora para cuando la pista esta ocupada :v
+    write("Por favor indique su direccion"),
+    nl,
+    read(D), %"almacena" la direccion del usuario en D
+    nl,
+    pista(P,V,D),
+    write(P), write(" asignada por 5 minutos").
 
 %Gramatica BNF para la identificacion del usuario
 ident--> identBlock.
@@ -161,15 +119,20 @@ tagmatri--> [W],{tagmatri(W)}.
 matriaeronave--> [W],{matricula(W)}.
 
 %Base de datos para la identificacion del usuario
+
+%Etiquetas que se deben leer en las respuestas del usuario
 tagvuelo("vuelo:").
 tagaerolinea("aerolinea:").
 tagmatri("matricula:").
 
-numvuelo("400,").
+%Numeros de vuelo permitidos
+numvuelo("400,"). %Hay agregar mas vuelos, digamos del 400 al 410 :v
 numvuelo("404,").
 
-aerolinea("tec-airlines,").
+%Aerolineas permitidas
+aerolinea("tec-airlines,"). %hay que agregar mas aerolineas, algo como lucy airlines o algo asi
 
+%Nombres de las posibles combinaciones de matrículas
 matricula("tango").
 matricula("fox").
 matricula("lima").
@@ -201,6 +164,80 @@ dcomple1("adios").
 dcomple2("cambio").
 dcomple3("fuera").
 dcong("y").
+
+
+% -----------------------------------------------------------------------------------
+% Base de datos del sistema.
+
+%Aviones pequeños.
+aeronave(pequeño,"Cessna").
+aeronave(pequeño,"Beechcraft").
+aeronave(pequeño,"Embraer Pheno").
+%Aviones medianos.
+aeronave(mediano,"Boing 717").
+aeronave(mediano,"Embraer 190").
+aeronave(mediano,"Airbus A220").
+%Aviones grandes.
+aeronave(grande,"Airbus 340").
+aeronave(grande,"Airbus 380").
+
+%Pistas.
+pista("P1",pequeño,"Este a Oeste").
+pista("P1",pequeño,"Oeste a Este").
+
+pista("P2-1",pequeño,"Este a Oeste").
+pista("P2-1",mediano,"Este a Oeste").
+pista("P2-1",pequeño,"Oeste a Este").
+pista("P2-1",mediano,"Oeste a Este").
+
+pista("P3",pequeño,"Este a Oeste").
+pista("P3",mediano,"Este a Oeste").
+pista("P3",grande,"Este a Oeste").
+
+pista("P3",pequeño,"Oeste a Este").
+pista("P3",mediano,"Oeste a Este").
+pista("P3",grande,"Oeste a Este").
+
+%Emergencias y su respectiva atención.
+emergencias("Perdida de motor","Llamar a bomberos").
+emergencias("Parto en vuelo","Llamar a médico").
+emergencias("Paro cardiaco","Llamar a médico").
+emergencias("Secuestro","Llamar al OIJ y a la Fuerza Pública").
+
+%Atención de Emergencias.
+atenEmergencias("Llamar a bomberos").
+atenEmergencias("Llamar a médico").
+atenEmergencias("Llamar al OIJ y a la Fuerza Pública").
+
+%Condición de Aterrizaje.
+condición("Viento").
+condición("Peso").
+condición("Largo de pista").
+condición("Velocidad").
+condición("Distancia").
+
+%Horarios de salida definidos cierto tiempo (definir) poner mas
+hora("15:00 pm").
+
+% ------------------------------------------------------------------------------------
+% Directriz para evitar alertas de PROLOG molestos para el usuario
+:-discontiguous(oracion_inicial/2).
+:-discontiguous(sin_nom/2).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
