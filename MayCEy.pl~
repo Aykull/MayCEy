@@ -1,3 +1,7 @@
+%Directriz para evitar warnings molestos para el usuario
+:-discontiguous(oracion_inicial/2).
+:-discontiguous(sin_nom/2).
+
 %Base de datos del sistema.
 
 %Aviones pequeños.
@@ -94,9 +98,11 @@ verbo("llamando").
 prepos("a").
 
 % Oracion inicial en caso de emergencia
-oracion_inicial(X,Y):- emergencia(X,Y), write("Cual es su emergencia?"), nl.
-%    read(E),
-%   split_string(E," ","",L).
+oracion_inicial(X,Y):- emergencia(X,Y),
+    write("Cual es su emergencia?"),
+    nl.
+    read(E),
+   split_string(E," ","",L).
 
 %Gramatica BNF para una emergencia
 emergencia --> sin_nom.
@@ -114,14 +120,15 @@ verificarsolicitud(X,Y):-
     solicitud(X,Y),
     write("Por favor identifiquese"),
     nl,
-    read(X),
-    string_lower(X,A),
-    split_string(A," ","",B),
-    identificacion(B,[]).
+    read(U),
+    string_lower(U,V),
+    split_string(V," ","",L),
+    identificacion(L,[]).
 
 %Gramatica BNF para solicitud de despegue o aterrizaje
 solicitud--> sin_v.
 sin_v--> verbpres, sust2, prep2, verbinf.
+
 verbpres --> [W],{verboprest(W)}.
 sust2--> [W],{sustantivo2(W)}.
 prep2--> [W], {preposicion2(W)}.
@@ -143,24 +150,32 @@ identificacion(A,B):-
 
 %Gramatica BNF para la identificacion del usuario
 ident--> identBlock.
-identBlock --> tagvuel, numvuel,tagaerol, aeroli, tagmatri, matriaeronave.
-               %vuelo: 400,/404, aerolinea: tec-airlines, matricula: {matricula}
+identBlock --> tagvuel, numvuel,tagaerol, aeroli, tagmatri, matriaeronave, matriaeronave, matriaeronave, matriaeronave.
+               %vuelo: 400,/404, aerolinea: tec-airlines, matricula: {matriculas}
 
-tagvuel--> [W], { tagvuelo(W)}.
-numvuel--> [W], { numvuelo(W)}.
-tagaerol--> [W], { tagaerolinea(W)}.
-aeroli--> [W], { aerolinea(W)}.
-tagmatri--> [W], { tagmatri(W)}.
-matriaeronave--> [W], { matricula(W)}.
+tagvuel--> [W],{tagvuelo(W)}.
+numvuel--> [W],{numvuelo(W)}.
+tagaerol--> [W],{tagaerolinea(W)}.
+aeroli--> [W],{aerolinea(W)}.
+tagmatri--> [W],{tagmatri(W)}.
+matriaeronave--> [W],{matricula(W)}.
 
 %Base de datos para la identificacion del usuario
 tagvuelo("vuelo:").
+tagaerolinea("aerolinea:").
+tagmatri("matricula:").
+
 numvuelo("400,").
 numvuelo("404,").
-tagaerolinea("aerolinea:").
+
 aerolinea("tec-airlines,").
-tagmatri("matricula:").
-matricula("tango fox lima delta").
+
+matricula("tango").
+matricula("fox").
+matricula("lima").
+matricula("delta").
+matricula("charlie").
+matricula("alfa").
 
 % ------------------------------------------------------------------------
 %Oracion de despedida
@@ -186,3 +201,6 @@ dcomple1("adios").
 dcomple2("cambio").
 dcomple3("fuera").
 dcong("y").
+
+
+
