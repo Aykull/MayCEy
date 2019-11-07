@@ -52,22 +52,13 @@ comple3("noches").
 verbo("llamando").
 prepos("a").
 
-% Oracion inicial en caso de emergencia
-oracion_inicial(X,Y):- emergencia(X,Y),
-    write("Cual es su emergencia?"),
-    nl.
-%    read(E),
-%   split_string(E," ","",L).
 
-%Gramatica BNF para una emergencia
-emergencia --> sin_nomE.
-sin_nomE--> help.  %Mayday/mayday
-sin_nomE--> help,help. %Mayday/mayday Mayday/mayday
+% ------------------------------------------------------------------------
+% Predicado que retorna el último elemento de una lista
 
-help --> [W],{id(W)}.
+ultimo_elemento([Y],Y).
+ultimo_elemento([_|X],Y):- ultimo_elemento(X,Y).
 
-%Base de datos la oracion inicial en caso de emergencia
-id("mayday").
 
 % -------------------------------------------------------------------------------
 % Predicado para la verificacion de la solicitud del usuario (despegar o
@@ -96,12 +87,6 @@ sustantivo2("permiso").
 preposicion2("para").
 verboinf("aterrizar").
 verboinf("despegar").
-
-% ------------------------------------------------------------------------
-% Predicado que retorna el último elemento de una lista
-
-ultimo_elemento([Y],Y).
-ultimo_elemento([_|X],Y):- ultimo_elemento(X,Y).
 
 % ------------------------------------------------------------------------
 % Predicado que lee la identificacion
@@ -219,6 +204,31 @@ dcomple3("fuera").
 dcong("y").
 
 
+% ------------------------------------------------------------------------------------
+% Predicado de la oracion inicial en caso de emergencia
+oracion_inicial(X,Y):- oracion_emergencia(X,Y),
+    write("Hola, por favor indique ¿cual es su emergencia?"),
+    nl,
+    read(E),
+    string_lower(E,El),
+    split_string(El," ","",L),
+    emergencia(L,[]).
+
+%Gramatica BNF para una emergencia
+oracion_emergencia --> sin_nomE.
+sin_nomE--> help.  %Mayday/mayday
+sin_nomE--> help,help. %Mayday/mayday Mayday/mayday
+
+help --> [W],{id(W)}.
+
+%Base de datos la oracion inicial en caso de emergencia
+id("mayday").
+
+% ------------------------------------------------------------------------
+% Predicado de la emeregencia
+
+emergencia(X,Y).
+
 % -----------------------------------------------------------------------------------
 % Base de datos del sistema.
 
@@ -254,7 +264,7 @@ pista("P3",grande,"Oeste a Este").
 %Emergencias y su respectiva atención.
 emergencias("Perdida de motor","Llamar a bomberos").
 emergencias("Parto en vuelo","Llamar a médico").
-emergencias("Paro cardiaco","Llamar a médico").
+emergencias("Paro cardiaco de pasajero","Llamar a médico").
 emergencias("Secuestro","Llamar al OIJ y a la Fuerza Pública").
 
 %Atención de Emergencias.
