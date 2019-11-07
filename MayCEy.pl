@@ -24,8 +24,9 @@ oracion_inicial(X,Y):-
     string_lower(T,U), %lo pasa a minuscula
     split_string(U," ","",L), %lo convierte en una lista
     ultimo_elemento(L,A), %saca el ultimo elemento para determinar si es aterrizaje o despegue
-    accion(A,Z), %determina si es llegada o salida
-    verificarsolicitud(L,[],Z). %pasa esa lista al predicado
+    accion(A,Z), %determina si es llegada o salida %accion(A,Z) establece la relacion entre despegar-->salida / aterrizar-->llegada
+    verificarsolicitud(L,[],Z). %L: lista de las palabras que conforman oracion inicial, Z: salida/llegada
+                                                          %IMPORTANTE el parametro Z se usa mas adelante
 
 %Gramatica BNF para la oracion inicial con saludo
 saludo --> sin_nom.
@@ -53,7 +54,7 @@ prepos("a").
 
 % Oracion inicial en caso de emergencia
 oracion_inicial(X,Y):- emergencia(X,Y),
-    write("Cual es su emergencia?"),
+    write("Hola, por favor indique ¿cual es su emergencia?"),
     nl.
 %    read(E),
 %   split_string(E," ","",L).
@@ -78,7 +79,7 @@ verificarsolicitud(X,Y,Z):-
     read(U),
     string_lower(U,V),
     split_string(V," ","",L),
-    identificacion(L,[],Z).
+    identificacion(L,[],Z). %L: lista con la identificacion del usuario, Z: salida/llegada (se usa mas adelante)
 
 %Gramatica BNF para solicitud de despegue o aterrizaje
 solicitud--> sin_v.
@@ -109,7 +110,7 @@ identificacion(A,B,Z):-
     write("Gracias,¿Que tipo de aeronave es?"),
     nl,
     read(U),
-    asignar(U,Z).
+    asignar(U,Z). %U: aeronave, Z: salida/llegada (Z se usa mas adelante)
 
 
 %Gramatica BNF para la identificacion del usuario
@@ -149,21 +150,51 @@ matricula("alfa").
 % -----------------------------------------------------------------------
 % Predicados que determinan si aterriza/despega y asigna la pista segun
 % direccion de vuelo y tamaño de aeronave
+% AQUIIIIIIIII SE USA Z
 asignar(X,Z):-
     aeronave(V,X), %la V indica el tamaño de la aeronave
     write("Por favor indique la hora de "), write(Z),
     nl,
     read(H), %"almacena" en H la hora de salida
     hora(H), %La hora para cuando la pista esta ocupada :v
-    write("Por favor indique su direccion de "), write(Z),
+     write("Por favor indique su direccion de "), write(Z),
     nl,
     read(D), %"almacena" la direccion del usuario en D
+    pista(P,V,D), %se utiliza el tamaño de la nave V y la direccion D para determinar la pista P
+    write(P), write(" asignada por 5 minutos"),
     nl,
-    pista(P,V,D),
-    write(P), write(" asignada por 5 minutos").
+    read(Ds),
+    string_lower(Ds,Es),
+    split_string(Es," ","",L),
+    oracion_de_agradecimiento(L,[]).
+
+% -----------------------------------------------------------------------
+% Predicado que analiza la oracion de agradecimiento
+oracion_de_agradecimiento(X,Y):-
+    agrad(X,Y),
+    write("Con gusto!"),
+    nl,
+    read(U),
+    string_lower(U,V),
+    split_string(V," ","",L),
+    oracion_final(L,[]).
+
+%Gramatica BNF para la oracion de agradecimiento
+agrad--> sm.
+sm --> g1.
+sm --> ad,g1.
+
+g1--> [W],{agradecimiento(W)}.
+ad--> [W],{adjetivo(W)}.
+
+agradecimiento("gracias").
+agradecimiento("gracias!").
+
+adjetivo("muchas").
 
 % ------------------------------------------------------------------------
-%Oracion de despedida
+% Predicado que analiza la oracion final para terminar de ejecutar
+% MayCEy
 oracion_final(X,Y):-despedida(X,Y).
 
 % Gramatica BNF para la oracion de despedida
@@ -181,7 +212,7 @@ dcom3--> [W],{dcomple3(W)}.
 dcon--> [W],{dcong(W)}.
 
 %Base de datos dela despedida
-dsustantivo("mayCEy").
+dsustantivo("maycey").
 dcomple1("adios").
 dcomple2("cambio").
 dcomple3("fuera").
