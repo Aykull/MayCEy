@@ -1,3 +1,10 @@
+% ------------------------------------------------------------------------------------
+% Directriz para evitar alertas de PROLOG molestos para el usuario
+:-discontiguous(oracion_inicial/2).
+:-discontiguous(sin_nom/2).
+
+
+
 % -------------------------------------------------------------------------
 % Predicado que inicia a MayCEy
 iniciar_MayCEy:-
@@ -16,7 +23,9 @@ oracion_inicial(X,Y):-
     read(T), %lee lo que escribe el usuario
     string_lower(T,U), %lo pasa a minuscula
     split_string(U," ","",L), %lo convierte en una lista
-    verificarsolicitud(L,[]). %pasa esa lista al predicado
+    ultimo_elemento(L,A), %saca el ultimo elemento para determinar si es aterrizaje o despegue
+    accion(A,Z), %determina si es llegada o salida
+    verificarsolicitud(L,[],Z). %pasa esa lista al predicado
 
 %Gramatica BNF para la oracion inicial con saludo
 saludo --> sin_nom.
@@ -50,9 +59,9 @@ oracion_inicial(X,Y):- emergencia(X,Y),
 %   split_string(E," ","",L).
 
 %Gramatica BNF para una emergencia
-emergencia --> sin_nom.
-sin_nom--> help.  %Mayday/mayday
-sin_nom--> help,help. %Mayday/mayday Mayday/mayday
+emergencia --> sin_nomE.
+sin_nomE--> help.  %Mayday/mayday
+sin_nomE--> help,help. %Mayday/mayday Mayday/mayday
 
 help --> [W],{id(W)}.
 
@@ -62,14 +71,14 @@ id("mayday").
 % -------------------------------------------------------------------------------
 % Predicado para la verificacion de la solicitud del usuario (despegar o
 % aterrizar)
-verificarsolicitud(X,Y):-
+verificarsolicitud(X,Y,Z):-
     solicitud(X,Y),
     write("Por favor identifiquese"),
     nl,
     read(U),
     string_lower(U,V),
     split_string(V," ","",L),
-    identificacion(L,[]).
+    identificacion(L,[],Z).
 
 %Gramatica BNF para solicitud de despegue o aterrizaje
 solicitud--> sin_v.
@@ -88,23 +97,20 @@ verboinf("aterrizar").
 verboinf("despegar").
 
 % ------------------------------------------------------------------------
-% Predicado que lee la identificacion y que asigna una pista al usuario
-identificacion(A,B):-
+% Predicado que retorna el último elemento de una lista
+
+ultimo_elemento([Y],Y).
+ultimo_elemento([_|X],Y):- ultimo_elemento(X,Y).
+
+% ------------------------------------------------------------------------
+% Predicado que lee la identificacion
+identificacion(A,B,Z):-
     ident(A,B),
     write("Gracias,¿Que tipo de aeronave es?"),
     nl,
     read(U),
-    aeronave(V,U), %la V indica el tamaño de la aeronave
-    write("Por favor indique la hora de salida"),
-    nl,
-    read(H), %"almacena" en H la hora de salida
-    hora(H), %La hora para cuando la pista esta ocupada :v
-    write("Por favor indique su direccion"),
-    nl,
-    read(D), %"almacena" la direccion del usuario en D
-    nl,
-    pista(P,V,D),
-    write(P), write(" asignada por 5 minutos").
+    asignar(U,Z).
+
 
 %Gramatica BNF para la identificacion del usuario
 ident--> identBlock.
@@ -139,6 +145,22 @@ matricula("lima").
 matricula("delta").
 matricula("charlie").
 matricula("alfa").
+
+% -----------------------------------------------------------------------
+% Predicados que determinan si aterriza/despega y asigna la pista segun
+% direccion de vuelo y tamaño de aeronave
+asignar(X,Z):-
+    aeronave(V,X), %la V indica el tamaño de la aeronave
+    write("Por favor indique la hora de "), write(Z),
+    nl,
+    read(H), %"almacena" en H la hora de salida
+    hora(H), %La hora para cuando la pista esta ocupada :v
+    write("Por favor indique su direccion de "), write(Z),
+    nl,
+    read(D), %"almacena" la direccion del usuario en D
+    nl,
+    pista(P,V,D),
+    write(P), write(" asignada por 5 minutos").
 
 % ------------------------------------------------------------------------
 %Oracion de despedida
@@ -219,12 +241,9 @@ condición("Distancia").
 %Horarios de salida definidos cierto tiempo (definir) poner mas
 hora("15:00 pm").
 
-% ------------------------------------------------------------------------------------
-% Directriz para evitar alertas de PROLOG molestos para el usuario
-:-discontiguous(oracion_inicial/2).
-:-discontiguous(sin_nom/2).
-
-
+%Relaciones entre posibles acciones del usuario
+accion("despegar","salida").
+accion("aterrizar","llegada").
 
 
 
