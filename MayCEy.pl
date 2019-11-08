@@ -2,31 +2,46 @@
 % Directriz para evitar alertas de PROLOG molestos para el usuario
 :-discontiguous(oracion_inicial/2).
 :-discontiguous(sin_nom/2).
-
+:-style_check(-singleton). %Establece que solo se inicie una vez el programa y no varias veces al mismo tiempo
 
 
 % -------------------------------------------------------------------------
 % Predicado que inicia a MayCEy
 iniciar_MayCEy:-
+    write("Usuario: "),
     read(T), %IMPORTANTE responder entre comillas
     string_lower(T,X),
     split_string(X," ","",L),
-    oracion_inicial(L, []).
+    oracion_inicial(L,[]).
 
 % ------------------------------------------------------------------------
 % Predicado que da respuesta a la oracion inicial en caso de saludo
 %
+
+
 oracion_inicial(X,Y):-
+    (saludo(X,Y)->
     saludo(X,Y),
-    write("Hola, en que le puedo ayudar?"),
+    write("MayCEy: Hola, ¿en que le puedo ayudar?"),
     nl, %salto de linea
+    write("Usuario: "),
     read(T), %lee lo que escribe el usuario
     string_lower(T,U), %lo pasa a minuscula
     split_string(U," ","",L), %lo convierte en una lista
     ultimo_elemento(L,A), %saca el ultimo elemento para determinar si es aterrizaje o despegue
     accion(A,Z), %determina si es llegada o salida %accion(A,Z) establece la relacion entre despegar-->salida / aterrizar-->llegada
-    verificarsolicitud(L,[],Z). %L: lista de las palabras que conforman oracion inicial, Z: salida/llegada
-                                                          %IMPORTANTE el parametro Z se usa mas adelante
+    verificarsolicitud(L,[],Z);
+    write("Por favor utilizar la sintaxis correcta"),
+    nl,
+    write("Usuario: "),
+    read(W),
+    string_lower(W,Z),
+    split_string(Z," ","",A),
+    oracion_inicial(A,[])).
+
+
+    %L: lista de las palabras que conforman oracion inicial, Z: salida/llegada
+ %IMPORTANTE el parametro Z se usa mas adelante
 
 %Gramatica BNF para la oracion inicial con saludo
 saludo --> sin_nom.
@@ -63,6 +78,7 @@ ultimo_elemento([_|X],Y):- ultimo_elemento(X,Y).
 % -------------------------------------------------------------------------------
 % Predicado para la verificacion de la solicitud del usuario (despegar o
 % aterrizar)
+
 verificarsolicitud(X,Y,Z):-
     solicitud(X,Y),
     write("Por favor identifiquese"),
@@ -92,8 +108,9 @@ verboinf("despegar").
 % Predicado que lee la identificacion
 identificacion(A,B,Z):-
     ident(A,B),
-    write("Gracias,¿Que tipo de aeronave es?"),
+    write("MayCEy: Gracias, ¿Que tipo de aeronave es?"),
     nl,
+    write("Usuario: "),
     read(U),
     asignar(U,Z). %U: aeronave, Z: salida/llegada (Z se usa mas adelante)
 
@@ -118,11 +135,22 @@ tagaerolinea("aerolinea:").
 tagmatri("matricula:").
 
 %Numeros de vuelo permitidos
-numvuelo("400,"). %Hay agregar mas vuelos, digamos del 400 al 410 :v
+numvuelo("401,"). %Hay agregar mas vuelos, digamos del 400 al 410 :v
+numvuelo("402,").
+numvuelo("403,").
 numvuelo("404,").
+numvuelo("405,").
+numvuelo("406,").
+numvuelo("407,").
+numvuelo("408,").
+numvuelo("409,").
+numvuelo("410,").
 
 %Aerolineas permitidas
-aerolinea("tec-airlines,"). %hay que agregar mas aerolineas, algo como lucy airlines o algo asi
+aerolinea("tec-airlines,").
+aerolinea("aykull-airlines,").
+aerolinea("jos-airlines,").
+aerolinea("ce-airlines,").
 
 %Nombres de las posibles combinaciones de matrículas
 matricula("tango").
@@ -131,6 +159,11 @@ matricula("lima").
 matricula("delta").
 matricula("charlie").
 matricula("alfa").
+matricula("echo").
+matricula("hotel").
+matricula("victor").
+matricula("bravo").
+matricula("romeo").
 
 % -----------------------------------------------------------------------
 % Predicados que determinan si aterriza/despega y asigna la pista segun
@@ -138,16 +171,18 @@ matricula("alfa").
 % AQUIIIIIIIII SE USA Z
 asignar(X,Z):-
     aeronave(V,X), %la V indica el tamaño de la aeronave
-    write("Por favor indique la hora de "), write(Z),
+    write("MayCEy: Por favor indique la hora de "), write(Z),
     nl,
+    write("Usuario: "),
     read(H), %"almacena" en H la hora de salida
     hora(H), %La hora para cuando la pista esta ocupada :v
-     write("Por favor indique su direccion de "), write(Z),
+     write("MayCEy: Por favor indique su direccion de "), write(Z),
     nl,
     read(D), %"almacena" la direccion del usuario en D
     pista(P,V,D), %se utiliza el tamaño de la nave V y la direccion D para determinar la pista P
-    write(P), write(" asignada por 5 minutos"),
+    write("MayCEy: "), write(P), write(" asignada por 5 minutos"),
     nl,
+    write("Usuario: "),
     read(Ds),
     string_lower(Ds,Es),
     split_string(Es," ","",L),
@@ -157,8 +192,9 @@ asignar(X,Z):-
 % Predicado que analiza la oracion de agradecimiento
 oracion_de_agradecimiento(X,Y):-
     agrad(X,Y),
-    write("Con gusto!"),
+    write("MayCEy: Con gusto!"),
     nl,
+    write("Usuario: "),
     read(U),
     string_lower(U,V),
     split_string(V," ","",L),
@@ -183,7 +219,7 @@ adjetivo("muchas").
 oracion_final(X,Y):-despedida(X,Y).
 
 % Gramatica BNF para la oracion de despedida
-despedida-->sin_nom_d.
+despedida--> sin_nom_d.
 sin_nom_d--> dcom1.
 sin_nom_d--> dcom1,dsust. %adios maycey
 sin_nom_d--> dcom2,dcon,dcom3,dsust. %cambio y fuera maycey
@@ -207,8 +243,9 @@ dcong("y").
 % ------------------------------------------------------------------------------------
 % Predicado de la oracion inicial en caso de emergencia
 oracion_inicial(X,Y):- oracion_emergencia(X,Y),
-    write("Hola, por favor indique ¿cual es su emergencia?"),
+    write("MayCEy: Hola, por favor indique ¿cual es su emergencia?"),
     nl,
+    write("Usuario: "),
     read(E),
     string_lower(E,El),
     split_string(El," ","",L),
@@ -223,6 +260,8 @@ help --> [W],{id(W)}.
 
 %Base de datos la oracion inicial en caso de emergencia
 id("mayday").
+id("7500").
+
 
 % ------------------------------------------------------------------------
 % Predicado de la emeregencia
@@ -280,11 +319,76 @@ condición("Velocidad").
 condición("Distancia").
 
 %Horarios de salida definidos cierto tiempo (definir) poner mas
-hora("15:00 pm").
+hora("1:00").
+hora("2:00").
+hora("3:00").
+hora("4:00").
+hora("5:00").
+hora("6:00").
+hora("7:00").
+hora("8:00").
+hora("9:00").
+hora("10:00").
+hora("11:00").
+hora("12:00").
+hora("13:00").
+hora("14:00").
+hora("15:00").
+hora("16:00").
+hora("17:00").
+hora("18:00").
+hora("19:00").
+hora("20:00").
+hora("21:00").
+hora("22:00").
+hora("23:00").
+hora("00:00").
 
 %Relaciones entre posibles acciones del usuario
 accion("despegar","salida").
 accion("aterrizar","llegada").
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
